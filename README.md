@@ -27,16 +27,14 @@ CUtils is a versatile and lightweight utility library designed to enhance produc
 
 ### Using Maven
 
-To include `c-utils` in your project, add the following to your `pom.xml`:
+To include `c-utils` in your project, add the following to your `pom.xml` under `<dependencies>`:
 
 ```xml
-<dependencies>
     <dependency>
         <groupId>com.chris</groupId>
         <artifactId>c-utils</artifactId>
         <version>1.0</version>
     </dependency>
-</dependencies>
 ```
 ---
 
