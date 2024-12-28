@@ -23,7 +23,21 @@ CUtils is a versatile and lightweight utility library designed to enhance produc
 ## Planned Features
 - Additional utility classes for collections, file I/O, and more.
 - Extended functionality for existing classes based on community feedback.
+## Installation
 
+### Using Maven
+
+To include `c-utils` in your project, add the following to your `pom.xml`:
+
+```xml
+<dependencies>
+    <dependency>
+        <groupId>com.chris</groupId>
+        <artifactId>c-utils</artifactId>
+        <version>1.0</version>
+    </dependency>
+</dependencies>
+```
 ---
 
 Whether you're building a large-scale enterprise system or a simple project, CUtils provides the tools you need to streamline development and enhance code readability.
