@@ -7,6 +7,51 @@
     <groupId>com.chris</groupId>
     <artifactId>c-utils</artifactId>
     <version>1.0</version>
+    <packaging>jar</packaging>
+
+    <name>CUtils</name>
+    <description>A lightweight utility library for Java development</description>
+    <url>https://github.com/ChristianHosh/c-utils</url>
+
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>https://opensource.org/licenses/MIT</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <id>ChristianHosh</id>
+            <name>Christian Hosh</name>
+            <email>mctibhosh@gmail.com</email>
+            <url>https://github.com/ChristianHosh</url>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:git://github.com/ChristianHosh/c-utils.git</connection>
+        <developerConnection>scm:git:ssh://github.com/ChristianHosh/c-utils.git</developerConnection>
+        <url>https://github.com/ChristianHosh/c-utils</url>
+    </scm>
+
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <url>https://maven.pkg.github.com/ChristianhHosh/c-utils</url>
+        </repository>
+    </distributionManagement>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <version>3.0.0-M1</version>
+            </plugin>
+        </plugins>
+    </build>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
