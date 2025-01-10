@@ -6,39 +6,65 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 
+@SuppressWarnings("unused")
 public class CDecimal extends Number implements Comparable<CDecimal>, Serializable {
   
   @Serial
   private static final long serialVersionUID = 998866456123654789L;
   
   public static final BigDecimal BD_ZERO = BigDecimal.ZERO;
-  public static final CDecimal ZERO = valueOf(0);
-  public static final CDecimal ONE = valueOf(1);
-  public static final CDecimal TWO = valueOf(2);
-  public static final CDecimal THREE = valueOf(3);
-  public static final CDecimal FOUR = valueOf(4);
-  public static final CDecimal FIVE = valueOf(5);
-  public static final CDecimal SIX = valueOf(6);
-  public static final CDecimal TEN = valueOf(10);
-  public static final CDecimal TWELVE = valueOf(12);
-  public static final CDecimal HUNDRED = valueOf(100);
+  public static final CDecimal ZERO = new CDecimal(new BigDecimal(0));
+  public static final CDecimal ONE = new CDecimal(new BigDecimal(1));
+  public static final CDecimal TWO = new CDecimal(new BigDecimal(2));
+  public static final CDecimal THREE = new CDecimal(new BigDecimal(3));
+  public static final CDecimal FOUR = new CDecimal(new BigDecimal(4));
+  public static final CDecimal FIVE = new CDecimal(new BigDecimal(5));
+  public static final CDecimal SIX = new CDecimal(new BigDecimal(6));
+  public static final CDecimal TEN = new CDecimal(new BigDecimal(10));
+  public static final CDecimal TWELVE = new CDecimal(new BigDecimal(12));
+  public static final CDecimal HUNDRED = new CDecimal(new BigDecimal(100));
   
   private final BigDecimal value;
   
-  public CDecimal(BigDecimal value) {
-    this.value = value == null ? BD_ZERO : value;
+  private CDecimal(BigDecimal value) {
+    this.value = value;
   }
   
   public static CDecimal valueOf(int value) {
-    return new CDecimal(BigDecimal.valueOf(value));
+    return switch (value) {
+      case 0 -> ZERO;
+      case 1 -> ONE;
+      case 2 -> TWO;
+      case 3 -> THREE;
+      case 4 -> FOUR;
+      case 5 -> FIVE;
+      case 6 -> SIX;
+      case 10 -> TEN;
+      case 12 -> TWELVE;
+      default -> new CDecimal(BigDecimal.valueOf(value));
+    };
   }
   
   public static CDecimal valueOf(double value) {
-    return new CDecimal(BigDecimal.valueOf(value));
+    if (value == 0.0) return ZERO;
+    if (value == 1.0) return ONE;
+    if (value == 2.0) return TWO;
+    if (value == 3.0) return THREE;
+    if (value == 4.0) return FOUR;
+    if (value == 5.0) return FIVE;
+    if (value == 6.0) return SIX;
+    if (value == 10.0) return TEN;
+    if (value == 12.0) return TWELVE;
+    return new CDecimal(new BigDecimal(value));
   }
   
   public static CDecimal valueOf(String value) {
-    return new CDecimal(new BigDecimal(value));
+    if (value == null || value.isEmpty()) return ZERO;
+    return valueOf(new BigDecimal(value));
+  }
+  
+  public static CDecimal valueOf(BigDecimal value) {
+    return value == null || BD_ZERO.equals(value) ? ZERO : new CDecimal(value);
   }
   
   public static CDecimal fromString(String value) {
@@ -175,8 +201,7 @@ public class CDecimal extends Number implements Comparable<CDecimal>, Serializab
   }
   
   public String format(String pattern) {
-    DecimalFormat df = new DecimalFormat(pattern);
-    return df.format(this.value);
+    return new DecimalFormat(pattern).format(this.value);
   }
   
   @Override
