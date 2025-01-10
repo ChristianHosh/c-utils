@@ -1,10 +1,10 @@
 package com.chris.cutils;
 
-import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalUnit;
 import java.util.Objects;
 
+@SuppressWarnings("unused")
 public class CPeriod implements Comparable<CPeriod> {
   
   private final CDate start;
@@ -39,7 +39,7 @@ public class CPeriod implements Comparable<CPeriod> {
   }
   
   public CDuration toDuration() {
-    return new CDuration(Duration.between(start.toLocalDateTime(), end.toLocalDateTime()));
+    return CDuration.valueOf(this);
   }
   
   public long getDurationInMilliseconds() {
@@ -110,7 +110,7 @@ public class CPeriod implements Comparable<CPeriod> {
   public final boolean equals(Object o) {
     if (!(o instanceof CPeriod that)) return false;
     
-    return start.equals(that.start) && end.equals(that.end);
+    return this == that || (this.start.equals(that.start) && this.end.equals(that.end));
   }
   
   @Override

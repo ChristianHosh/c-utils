@@ -1,9 +1,9 @@
 package com.chris.cutils;
 
 import java.time.Duration;
-import java.time.ZoneId;
 import java.util.Objects;
 
+@SuppressWarnings("unused")
 public class CDuration implements Comparable<CDuration> {
   
   public static final CDuration ZERO = new CDuration(Duration.ZERO);
@@ -14,12 +14,8 @@ public class CDuration implements Comparable<CDuration> {
   
   private final Duration value;
   
-  public CDuration(Duration value) {
+  private CDuration(Duration value) {
     this.value = value;
-  }
-  
-  public CDuration(CPeriod period) {
-    this.value = Duration.between(period.getStart().toLocalDateTime(), period.getEnd().toLocalDateTime());
   }
   
   public static CDuration ofSeconds(long seconds) {
@@ -36,6 +32,18 @@ public class CDuration implements Comparable<CDuration> {
   
   public static CDuration ofDays(long days) {
     return new CDuration(Duration.ofDays(days));
+  }
+  
+  public static CDuration valueOf(Duration duration) {
+    return duration == null || duration.isZero() ? ZERO : new CDuration(duration);
+  }
+  
+  public static CDuration valueOf(CPeriod period) {
+    return valueOf(Duration.between(period.getStart().toLocalDateTime(), period.getEnd().toLocalDateTime()));
+  }
+  
+  public static Builder builder() {
+    return new Builder();
   }
   
   public long toSeconds() {
@@ -119,7 +127,7 @@ public class CDuration implements Comparable<CDuration> {
   public final boolean equals(Object o) {
     if (!(o instanceof CDuration that)) return false;
     
-    return Objects.equals(value, that.value);
+    return this == that || this.value.equals(that.value);
   }
   
   @Override
@@ -179,20 +187,16 @@ public class CDuration implements Comparable<CDuration> {
       return this;
     }
     
-    public CPeriod build() {
-      return build(ZoneId.systemDefault());
-    }
-    
-    public CPeriod build(ZoneId zoneId) {
-      CDate start = CDate.currentDate(zoneId);
-      CDate end = start.addYear(years)
+    public CDuration build() {
+      CDate zero = CDate.EPOCH_ZERO;
+      CDate end = zero.addYear(years)
           .addMonth(months)
           .addDay(days)
           .addHour(hours)
           .addMinute(minutes)
           .addSecond(seconds)
           .addMillis(milliseconds);
-      return new CPeriod(start, end);
+      return valueOf(Duration.between(zero.toInstant(), end.toInstant()));
     }
   }
 }

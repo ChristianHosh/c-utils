@@ -6,6 +6,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.TimeZone;
 
+@SuppressWarnings("unused")
 public class CDate implements Comparable<CDate> {
   
   public static final long DAY_IN_MS = 86400000L;
@@ -234,17 +235,7 @@ public class CDate implements Comparable<CDate> {
   
   @Override
   public int compareTo(CDate that) {
-    if (that == null) {
-      return -1;
-    } else {
-      long thisTime = this.getTime();
-      long thatTime = that.getTime();
-      if (thisTime == thatTime) {
-        return 0;
-      } else {
-        return thisTime > thatTime ? 1 : -1;
-      }
-    }
+    return Long.compare(this.time, that.time);
   }
   
 }
