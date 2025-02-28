@@ -12,6 +12,19 @@ public class CDuration implements Comparable<CDuration> {
   public static final CDuration ONE_HOUR = ofHours(1);
   public static final CDuration ONE_DAY = ofDays(1);
   
+  static final int SECONDS_IN_DAY = 86400;
+  static final int SECONDS_IN_HOUR = 3600;
+  static final int SECONDS_IN_MINUTE = 60;
+  static final int MINUTES_IN_DAY = 1440;
+  static final int HOURS_IN_DAY = 24;
+  
+  public static final String DAY_PART = "d";
+  public static final String HOUR_PART = "h";
+  public static final String MINUTE_PART = "m";
+  public static final String SECOND_PART = "s";
+  
+  public static final String FULL_DURATION_FORMAT = DAY_PART + HOUR_PART + MINUTE_PART + SECOND_PART;
+
   private final Duration value;
   
   private CDuration(Duration value) {
@@ -19,19 +32,32 @@ public class CDuration implements Comparable<CDuration> {
   }
   
   public static CDuration ofSeconds(long seconds) {
+    if (seconds == 0) return ZERO;
+    if (seconds == 1) return ONE_SECOND;
+    if (seconds == SECONDS_IN_MINUTE) return ONE_MINUTE;
+    if (seconds == SECONDS_IN_HOUR) return ONE_HOUR;
+    if (seconds == SECONDS_IN_DAY) return ONE_DAY;
     return new CDuration(Duration.ofSeconds(seconds));
   }
   
   public static CDuration ofMinutes(long minutes) {
+    if (minutes == 0) return ZERO;
+    if (minutes == 1) return ONE_MINUTE;
+    if (minutes == SECONDS_IN_MINUTE) return ONE_HOUR;
+    if (minutes == MINUTES_IN_DAY) return ONE_DAY;
     return new CDuration(Duration.ofMinutes(minutes));
   }
   
   public static CDuration ofHours(long hours) {
+    if (hours == 0) return ZERO;
+    if (hours == 1) return ONE_HOUR;
+    if (hours == HOURS_IN_DAY) return ONE_DAY;
     return new CDuration(Duration.ofHours(hours));
   }
   
   public static CDuration ofDays(long days) {
-    return new CDuration(Duration.ofDays(days));
+    if (days == 0) return ZERO;
+    return days == 1 ? ONE_DAY : new CDuration(Duration.ofDays(days));
   }
   
   public static CDuration valueOf(Duration duration) {
@@ -120,7 +146,33 @@ public class CDuration implements Comparable<CDuration> {
   
   @Override
   public String toString() {
-    return value.toString();
+    return toString(FULL_DURATION_FORMAT);
+  }
+  
+  public String toString(String format) {
+    long totalSeconds = value.getSeconds();
+
+    long days = totalSeconds / 86400;
+    long hours = (totalSeconds % 86400) / 3600;
+    long minutes = (totalSeconds % 3600) / 60;
+    long seconds = totalSeconds % 60;
+
+    StringBuilder sb = new StringBuilder();
+
+    if (format.contains(DAY_PART) && days > 0) sb.append(days).append("d ");
+    if (format.contains(HOUR_PART) && hours > 0) sb.append(hours).append("h ");
+    if (format.contains(MINUTE_PART) && minutes > 0) sb.append(minutes).append("m ");
+    if (format.contains(SECOND_PART) && seconds > 0) sb.append(seconds).append("s ");
+
+    // If no components were added but the format expects something, add the smallest unit in the format
+    if (sb.isEmpty()) {
+      if (format.contains(DAY_PART)) sb.append(days).append("d ");
+      else if (format.contains(HOUR_PART)) sb.append(hours).append("h ");
+      else if (format.contains(MINUTE_PART)) sb.append(minutes).append("m ");
+      else if (format.contains(SECOND_PART)) sb.append(seconds).append("s ");
+    }
+
+    return sb.toString().trim();
   }
   
   @Override
