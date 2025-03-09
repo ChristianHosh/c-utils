@@ -2,6 +2,7 @@ package com.chris.cutils;
 
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalUnit;
+import java.util.List;
 import java.util.Objects;
 
 @SuppressWarnings("unused")
@@ -9,6 +10,8 @@ public class CPeriod implements Comparable<CPeriod> {
   
   private final CDate start;
   private final CDate end;
+  
+  private static final List<TemporalUnit> UNITS = List.of(ChronoUnit.YEARS, ChronoUnit.MONTHS, ChronoUnit.WEEKS, ChronoUnit.DAYS, ChronoUnit.HOURS, ChronoUnit.MINUTES, ChronoUnit.SECONDS);
   
   public CPeriod(CDate start, CDate end) {
     Objects.requireNonNull(start);
@@ -79,27 +82,39 @@ public class CPeriod implements Comparable<CPeriod> {
   }
   
   public boolean contains(CDate date) {
-    return !start.isGreater(date) && !end.isLess(date);
+    return date.inPeriod(this);
   }
   
   public boolean overlaps(CPeriod other) {
     return !(this.end.isLess(other.start) || this.start.isGreater(other.end));
   }
   
+  public CPeriod shiftSeconds(int seconds) {
+    return seconds == 0 ? this : new CPeriod(this.start.addSecond(seconds), this.end.addSecond(seconds));
+  }
+  
+  public CPeriod shiftMinutes(int minutes) {
+    return minutes == 0 ? this : new CPeriod(this.start.addMinute(minutes), this.end.addMinute(minutes));
+  }
+  
+  public CPeriod shiftHours(int hours) {
+    return hours == 0 ? this : new CPeriod(this.start.addHour(hours), this.end.addHour(hours));
+  }
+  
   public CPeriod shiftDays(int days) {
-    return new CPeriod(this.start.addDay(days), this.end.addDay(days));
+    return days == 0 ? this : new CPeriod(this.start.addDay(days), this.end.addDay(days));
   }
   
   public CPeriod shiftWeeks(int weeks) {
-    return new CPeriod(this.start.addWeek(weeks), this.end.addWeek(weeks));
+    return weeks == 0 ? this : new CPeriod(this.start.addWeek(weeks), this.end.addWeek(weeks));
   }
   
   public CPeriod shiftMonths(int months) {
-    return new CPeriod(this.start.addMonth(months), this.end.addMonth(months));
+    return months == 0 ? this : new CPeriod(this.start.addMonth(months), this.end.addMonth(months));
   }
   
   public CPeriod shiftYears(int years) {
-    return new CPeriod(this.start.addYear(years), this.end.addYear(years));
+    return years == 0 ? this : new CPeriod(this.start.addYear(years), this.end.addYear(years));
   }
   
   public CPeriod extend(int days) {
@@ -138,10 +153,11 @@ public class CPeriod implements Comparable<CPeriod> {
   
   @Override
   public String toString() {
-    return "CPeriod{" +
-        "start=" + start +
-        ", end=" + end +
-        '}';
+    return this.start + " - " + this.end;
+  }
+  
+  public String toDateLabel() {
+    return CDate.getDateLabel(this.start, this.end);
   }
   
   @Override

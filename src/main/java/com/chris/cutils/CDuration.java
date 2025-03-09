@@ -1,30 +1,27 @@
 package com.chris.cutils;
 
 import java.time.Duration;
+import java.time.temporal.*;
+import java.util.List;
 import java.util.Objects;
 
 @SuppressWarnings("unused")
-public class CDuration implements Comparable<CDuration> {
+public class CDuration implements Comparable<CDuration>, TemporalAmount {
   
   public static final CDuration ZERO = new CDuration(Duration.ZERO);
-  public static final CDuration ONE_SECOND = ofSeconds(1);
-  public static final CDuration ONE_MINUTE = ofMinutes(1);
-  public static final CDuration ONE_HOUR = ofHours(1);
-  public static final CDuration ONE_DAY = ofDays(1);
+  public static final String DAY_PART = "d";  public static final CDuration ONE_SECOND = ofSeconds(1);
+  public static final String HOUR_PART = "h";  public static final CDuration ONE_MINUTE = ofMinutes(1);
+  public static final String MINUTE_PART = "m";  public static final CDuration ONE_HOUR = ofHours(1);
+  public static final String SECOND_PART = "s";  public static final CDuration ONE_DAY = ofDays(1);
+  public static final String FULL_DURATION_FORMAT = DAY_PART + HOUR_PART + MINUTE_PART + SECOND_PART;
   
   static final int SECONDS_IN_DAY = 86400;
   static final int SECONDS_IN_HOUR = 3600;
   static final int SECONDS_IN_MINUTE = 60;
   static final int MINUTES_IN_DAY = 1440;
   static final int HOURS_IN_DAY = 24;
+  private static final List<TemporalUnit> UNITS = List.of(ChronoUnit.NANOS, ChronoUnit.SECONDS, ChronoUnit.MINUTES, ChronoUnit.HOURS, ChronoUnit.DAYS);
   
-  public static final String DAY_PART = "d";
-  public static final String HOUR_PART = "h";
-  public static final String MINUTE_PART = "m";
-  public static final String SECOND_PART = "s";
-  
-  public static final String FULL_DURATION_FORMAT = DAY_PART + HOUR_PART + MINUTE_PART + SECOND_PART;
-
   private final Duration value;
   
   private CDuration(Duration value) {
@@ -151,19 +148,19 @@ public class CDuration implements Comparable<CDuration> {
   
   public String toString(String format) {
     long totalSeconds = value.getSeconds();
-
+    
     long days = totalSeconds / 86400;
     long hours = (totalSeconds % 86400) / 3600;
     long minutes = (totalSeconds % 3600) / 60;
     long seconds = totalSeconds % 60;
-
+    
     StringBuilder sb = new StringBuilder();
-
+    
     if (format.contains(DAY_PART) && days > 0) sb.append(days).append("d ");
     if (format.contains(HOUR_PART) && hours > 0) sb.append(hours).append("h ");
     if (format.contains(MINUTE_PART) && minutes > 0) sb.append(minutes).append("m ");
     if (format.contains(SECOND_PART) && seconds > 0) sb.append(seconds).append("s ");
-
+    
     // If no components were added but the format expects something, add the smallest unit in the format
     if (sb.isEmpty()) {
       if (format.contains(DAY_PART)) sb.append(days).append("d ");
@@ -171,7 +168,7 @@ public class CDuration implements Comparable<CDuration> {
       else if (format.contains(MINUTE_PART)) sb.append(minutes).append("m ");
       else if (format.contains(SECOND_PART)) sb.append(seconds).append("s ");
     }
-
+    
     return sb.toString().trim();
   }
   
@@ -190,6 +187,35 @@ public class CDuration implements Comparable<CDuration> {
   @Override
   public int compareTo(CDuration o) {
     return this.value.compareTo(o.value);
+  }
+  
+  @Override
+  public long get(TemporalUnit unit) {
+    if (unit == ChronoUnit.SECONDS || unit == ChronoUnit.NANOS)
+      return this.value.get(unit);
+    else if (unit == ChronoUnit.MINUTES)
+      return this.value.getSeconds() / SECONDS_IN_MINUTE;
+    else if (unit == ChronoUnit.HOURS)
+      return this.value.getSeconds() / SECONDS_IN_HOUR;
+    else if (unit == ChronoUnit.DAYS)
+      return this.value.getSeconds() / SECONDS_IN_DAY;
+    else
+      throw new UnsupportedTemporalTypeException("Unsupported unit: " + unit);
+  }
+  
+  @Override
+  public List<TemporalUnit> getUnits() {
+    return UNITS;
+  }
+  
+  @Override
+  public Temporal addTo(Temporal temporal) {
+    return this.value.addTo(temporal);
+  }
+  
+  @Override
+  public Temporal subtractFrom(Temporal temporal) {
+    return this.value.subtractFrom(temporal);
   }
   
   public static final class Builder {
@@ -240,15 +266,15 @@ public class CDuration implements Comparable<CDuration> {
     }
     
     public CDuration build() {
-      CDate zero = CDate.EPOCH_ZERO;
-      CDate end = zero.addYear(years)
+      CDate start = CDate.EPOCH_ZERO;
+      CDate end = start.addYear(years)
           .addMonth(months)
           .addDay(days)
           .addHour(hours)
           .addMinute(minutes)
           .addSecond(seconds)
           .addMillis(milliseconds);
-      return valueOf(Duration.between(zero.toInstant(), end.toInstant()));
+      return valueOf(new CPeriod(start, end));
     }
   }
 }

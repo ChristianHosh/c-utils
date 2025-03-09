@@ -4,10 +4,11 @@ package com.chris.cutils;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.Objects;
 import java.util.TimeZone;
 
 @SuppressWarnings("unused")
-public class CDate implements Comparable<CDate> {
+public final class CDate implements Comparable<CDate> {
   
   public static final long DAY_IN_MS = 86400000L;
   public static final int SECOND = 1000;
@@ -24,20 +25,10 @@ public class CDate implements Comparable<CDate> {
     TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
   }
   
-  private LocalDateTime dateTime;
-  private long time;
-  
-  public CDate(long time) {
-    this.setTime(time);
-  }
+  private final LocalDateTime dateTime;
   
   public CDate(LocalDateTime dateTime) {
     this.dateTime = dateTime;
-    this.time = this.toInstantMilli();
-  }
-  
-  public CDate(CDate date) {
-    this.setTime(date.getTime());
   }
   
   public CDate(int day, int month, int year) {
@@ -54,11 +45,6 @@ public class CDate implements Comparable<CDate> {
   
   public CDate(LocalDate date, LocalTime time) {
     this.dateTime = LocalDateTime.of(date, time);
-    this.time = this.toInstantMilli();
-  }
-  
-  private static long truncate(long time) {
-    return time - time % DAY_IN_MS;
   }
   
   public static CDate currentServerDate() {
@@ -77,23 +63,31 @@ public class CDate implements Comparable<CDate> {
     return new CDate(LocalDateTime.parse(date, DateTimeFormatter.ofPattern(pattern)));
   }
   
+  public static String getDateLabel(CDate date1, CDate date2) {
+    date1 = Objects.requireNonNull(date1).zeroTime();
+    date2 = Objects.requireNonNull(date2).zeroTime();
+    if (date1.isLess(date2))
+      throw new IllegalArgumentException("date1 should be greater or equal to date2");
+    
+    if (date1.equals(date2)) {
+      return date1.toDateString();
+    } else if (date1.getMonth() == date2.getMonth() && date1.isFirstDayOfMonth() && date2.isLastDayOfMonth()) {
+      return CString.padLeft(String.valueOf(date1.getMonth()), 2, '0') + "/" + date1.getYear();
+    } else if (date1.getYear() == date2.getYear() && date1.isFirstDayOfYear() && date2.isLastDayOfYear()) {
+      return String.valueOf(date1.getYear());
+    } else if (date1.addMonth(3).equals(date2) && date1.isFirstDayOfYear() && date2.isLastDayOfMonth()) {
+      return "Q" + ((date1.getMonth() / 3) + 1) + "/" + date1.getYear();
+    }
+    
+    return date1.toDateString() + " - " + date2.toDateString();
+  }
+  
   public String format(String pattern) {
     return format(this, pattern);
   }
   
   public long getTime() {
-    return this.time;
-  }
-  
-  public void setTime(long time) {
-    this.time = time;
-    this.dateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(time), UTC);
-    checkTime();
-  }
-  
-  private void checkTime() {
-    if (this.time != toInstantMilli())
-      throw new IllegalArgumentException();
+    return this.toInstantMilli();
   }
   
   public long toInstantMilli() {
@@ -190,7 +184,11 @@ public class CDate implements Comparable<CDate> {
   }
   
   public CDate zeroTime() {
-    return new CDate(truncate(this.getTime()));
+    return ZERO_TIME.equals(this.toLocalTime()) ? this : new CDate(toLocalDate(), ZERO_TIME);
+  }
+  
+  public CDate zeroDate() {
+    return ZERO_DATE.equals(this.toLocalDate()) ? this : new CDate(ZERO_DATE, toLocalTime());
   }
   
   public boolean isGreater(CDate dd) {
@@ -217,12 +215,28 @@ public class CDate implements Comparable<CDate> {
     return this.isLessOrEqual(other) ? new CPeriod(this, other) : new CPeriod(other, this);
   }
   
-  public boolean isInPeriod(CPeriod period) {
-    return period.contains(this);
+  public boolean inPeriod(CPeriod period) {
+    return inPeriod(period.getStart(), period.getEnd());
+  }
+  
+  public boolean inPeriod(CDate start, CDate end) {
+    return this.isGreaterOrEqual(start) && this.isLess(end);
+  }
+  
+  public boolean inOpenPeriod(CDate start, CDate end) {
+    if (start != null && end != null)
+      return inPeriod(start, end);
+    else if (start != null) {
+      return this.isGreaterOrEqual(start);
+    } else if (end != null) {
+      return this.isLess(end);
+    }
+    
+    return true;
   }
   
   public int hashCode() {
-    return 111 + Long.hashCode(this.getTime());
+    return 111 + Objects.hash(this.dateTime);
   }
   
   public boolean equals(Object obj) {
@@ -233,9 +247,56 @@ public class CDate implements Comparable<CDate> {
     }
   }
   
-  @Override
-  public int compareTo(CDate that) {
-    return Long.compare(this.time, that.time);
+  public boolean equalsDate(CDate date) {
+    if (date == null) return false;
+    return this.toLocalDate().equals(date.toLocalDate());
   }
   
+  public boolean equalsTime(CDate date) {
+    if (date == null) return false;
+    return this.toLocalTime().equals(date.toLocalTime());
+  }
+  
+  @Override
+  public int compareTo(CDate that) {
+    return this.dateTime.compareTo(that.dateTime);
+  }
+  
+  public boolean isLastDayOfMonth() {
+    LocalDate date = this.toLocalDate();
+    return date.getDayOfMonth() == date.lengthOfMonth();
+  }
+  
+  public boolean isFirstDayOfMonth() {
+    return this.toLocalDate().getDayOfMonth() == 1;
+  }
+  
+  public CDate toFirstDayOfMonth() {
+    return this.isFirstDayOfMonth() ? this : new CDate(this.dateTime.withDayOfMonth(1));
+  }
+  
+  public CDate toLastDayOfMonth() {
+    return this.isLastDayOfMonth() ? this : new CDate(this.dateTime.withDayOfMonth(this.toLocalDate().lengthOfMonth()));
+  }
+  
+  public boolean isLastDayOfYear() {
+    LocalDate date = this.toLocalDate();
+    return date.getDayOfYear() == date.lengthOfYear();
+  }
+  
+  public boolean isFirstDayOfYear() {
+    return this.toLocalDate().getDayOfYear() == 1;
+  }
+  
+  public CDate toFirstDayOfYear() {
+    return this.isFirstDayOfYear() ? this : new CDate(this.dateTime.withDayOfYear(1));
+  }
+  
+  public CDate toLastDayOfYear() {
+    return this.isLastDayOfYear() ? this : new CDate(this.dateTime.withDayOfYear(this.toLocalDate().lengthOfYear()));
+  }
+  
+  public Month getMonthEnum() {
+    return this.dateTime.getMonth();
+  }
 }
