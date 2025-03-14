@@ -4,6 +4,7 @@ package com.chris.cutils;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalAmount;
 import java.util.Objects;
 import java.util.TimeZone;
 
@@ -298,5 +299,18 @@ public final class CDate implements Comparable<CDate> {
   
   public Month getMonthEnum() {
     return this.dateTime.getMonth();
+  }
+
+  public CDate plus(TemporalAmount amount) {
+    if (amount instanceof Period period && period.isZero()) return this;
+    if (amount instanceof Duration duration && duration.isZero()) return this;
+    return new CDate(toLocalDateTime().plus(amount));
+  }
+
+
+  public CDate minus(TemporalAmount amount) {
+    if (amount instanceof Period period && period.isZero()) return this;
+    if (amount instanceof Duration duration && duration.isZero()) return this;
+    return new CDate(toLocalDateTime().minus(amount));
   }
 }
