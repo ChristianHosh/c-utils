@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Objects;
 
 @SuppressWarnings("unused")
-public class CDuration implements Comparable<CDuration>, TemporalAmount {
+public final class CDuration implements Comparable<CDuration>, TemporalAmount {
   
   public static final CDuration ZERO = new CDuration(Duration.ZERO);
   public static final String DAY_PART = "d";  public static final CDuration ONE_SECOND = ofSeconds(1);
@@ -20,6 +20,7 @@ public class CDuration implements Comparable<CDuration>, TemporalAmount {
   static final int SECONDS_IN_MINUTE = 60;
   static final int MINUTES_IN_DAY = 1440;
   static final int HOURS_IN_DAY = 24;
+  
   private static final List<TemporalUnit> UNITS = List.of(ChronoUnit.NANOS, ChronoUnit.SECONDS, ChronoUnit.MINUTES, ChronoUnit.HOURS, ChronoUnit.DAYS);
   
   private final Duration value;
@@ -173,7 +174,7 @@ public class CDuration implements Comparable<CDuration>, TemporalAmount {
   }
   
   @Override
-  public final boolean equals(Object o) {
+  public boolean equals(Object o) {
     if (!(o instanceof CDuration that)) return false;
     
     return this == that || this.value.equals(that.value);
@@ -219,8 +220,6 @@ public class CDuration implements Comparable<CDuration>, TemporalAmount {
   }
   
   public static final class Builder {
-    private int years;
-    private int months;
     private int days;
     private int hours;
     private int minutes;
@@ -228,16 +227,6 @@ public class CDuration implements Comparable<CDuration>, TemporalAmount {
     private int milliseconds;
     
     public Builder() {
-    }
-    
-    public Builder years(int years) {
-      this.years = years;
-      return this;
-    }
-    
-    public Builder months(int months) {
-      this.months = months;
-      return this;
     }
     
     public Builder days(int days) {
@@ -267,14 +256,13 @@ public class CDuration implements Comparable<CDuration>, TemporalAmount {
     
     public CDuration build() {
       CDate start = CDate.EPOCH_ZERO;
-      CDate end = start.addYear(years)
-          .addMonth(months)
+      CDate end = start
           .addDay(days)
           .addHour(hours)
           .addMinute(minutes)
           .addSecond(seconds)
           .addMillis(milliseconds);
-      return valueOf(new CPeriod(start, end));
+      return new CPeriod(start, end).toDuration();
     }
   }
 }
