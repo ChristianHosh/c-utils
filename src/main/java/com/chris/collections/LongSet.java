@@ -5,7 +5,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-public class LongSet {
+public class LongSet implements Iterable<Long>{
 
   private Node root;
   private int size = 0;
@@ -47,6 +47,7 @@ public class LongSet {
     return list.stream().mapToLong(i -> i).toArray();
   }
 
+  @Override
   public Iterator<Long> iterator() {
     List<Long> list = new ArrayList<>();
     inOrder(root, list);

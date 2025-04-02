@@ -3,23 +3,15 @@ package com.chris.collections;
 import java.util.*;
 import java.util.function.Function;
 
-public class IntMap<V> {
-  
-  private class Node {
-    int key;
-    V value;
-    Node left, right;
-    int height;
-
-    Node(int key, V value) {
-      this.key = key;
-      this.value = value;
-      this.height = 1;
-    }
-  }
+public class IntMap<V> implements Iterable<Map.Entry<Integer, V>> {
 
   private Node root;
   private int size = 0; // Keep track of size
+
+  @Override
+  public Iterator<Map.Entry<Integer, V>> iterator() {
+    return entrySet().iterator();
+  }
 
   public int size() {
     return size;
@@ -33,11 +25,11 @@ public class IntMap<V> {
     return search(root, key) != null;
   }
 
-  public boolean containsValue(Object value) {
+  public boolean containsValue(V value) {
     return containsValueRecursive(root, value);
   }
 
-  private boolean containsValueRecursive(Node node, Object value) {
+  private boolean containsValueRecursive(Node node, V value) {
     if (node == null) return false;
     if (Objects.equals(node.value, value)) return true;
     return containsValueRecursive(node.left, value) || containsValueRecursive(node.right, value);
@@ -55,7 +47,7 @@ public class IntMap<V> {
     return null;
   }
 
-  public Object putIfAbsent(int key, V value) {
+  public V putIfAbsent(int key, V value) {
     if (!containsKey(key)) {
       put(key, value);
       return null;
@@ -63,7 +55,7 @@ public class IntMap<V> {
     return get(key);
   }
 
-  public Object computeIfAbsent(int key, Function<Integer, V> mappingFunction) {
+  public V computeIfAbsent(int key, Function<Integer, V> mappingFunction) {
     if (!containsKey(key)) {
       V newValue = mappingFunction.apply(key);
       put(key, newValue);
@@ -104,13 +96,13 @@ public class IntMap<V> {
     }
   }
 
-  public Collection<Object> values() {
-    List<Object> values = new ArrayList<>();
+  public Collection<V> values() {
+    List<V> values = new ArrayList<>(this.size);
     inOrderValues(root, values);
     return values;
   }
 
-  private void inOrderValues(Node node, List<Object> values) {
+  private void inOrderValues(Node node, List<V> values) {
     if (node != null) {
       inOrderValues(node.left, values);
       values.add(node.value);
@@ -118,13 +110,13 @@ public class IntMap<V> {
     }
   }
 
-  public Set<Map.Entry<Integer, Object>> entrySet() {
-    Set<Map.Entry<Integer, Object>> entries = new TreeSet<>(Comparator.comparingInt(Map.Entry::getKey));
+  public Set<Map.Entry<Integer, V>> entrySet() {
+    Set<Map.Entry<Integer, V>> entries = new TreeSet<>(Comparator.comparingInt(Map.Entry::getKey));
     inOrderEntries(root, entries);
     return entries;
   }
 
-  private void inOrderEntries(Node node, Set<Map.Entry<Integer, Object>> entries) {
+  private void inOrderEntries(Node node, Set<Map.Entry<Integer, V>> entries) {
     if (node != null) {
       inOrderEntries(node.left, entries);
       entries.add(new AbstractMap.SimpleEntry<>(node.key, node.value));
@@ -232,5 +224,18 @@ public class IntMap<V> {
   private Node minValueNode(Node node) {
     while (node.left != null) node = node.left;
     return node;
+  }
+
+  private class Node {
+    int key;
+    V value;
+    Node left, right;
+    int height;
+
+    Node(int key, V value) {
+      this.key = key;
+      this.value = value;
+      this.height = 1;
+    }
   }
 }

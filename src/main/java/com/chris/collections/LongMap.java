@@ -3,7 +3,7 @@ package com.chris.collections;
 import java.util.*;
 import java.util.function.Function;
 
-public class LongMap<V> {
+public class LongMap<V> implements Iterable<Map.Entry<Long, V>>{
   private Node root;
   private int size = 0; // Keep track of size
 
@@ -218,6 +218,11 @@ public class LongMap<V> {
   private Node minValueNode(Node node) {
     while (node.left != null) node = node.left;
     return node;
+  }
+
+  @Override
+  public Iterator<Map.Entry<Long, V>> iterator() {
+    return entrySet().iterator();
   }
 
   private class Node {

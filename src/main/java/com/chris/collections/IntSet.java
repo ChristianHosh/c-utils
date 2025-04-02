@@ -5,7 +5,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-public class IntSet {
+public class IntSet implements Iterable<Integer> {
   private Node root;
   private int size = 0;
 
@@ -47,7 +47,7 @@ public class IntSet {
   }
 
   public Iterator<Integer> iterator() {
-    List<Integer> list = new ArrayList<>();
+    List<Integer> list = new ArrayList<>(this.size);
     inOrder(root, list);
     return list.iterator();
   }
