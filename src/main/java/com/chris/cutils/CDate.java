@@ -220,7 +220,7 @@ public final class CDate implements Comparable<CDate> {
   }
   
   public boolean inPeriod(CDate start, CDate end) {
-    return this.isGreaterOrEqual(start) && this.isLess(end);
+    return this.isGreaterOrEqual(start) && this.isLessOrEqual(end);
   }
   
   public boolean inOpenPeriod(CDate start, CDate end) {
@@ -229,7 +229,7 @@ public final class CDate implements Comparable<CDate> {
     else if (start != null) {
       return this.isGreaterOrEqual(start);
     } else if (end != null) {
-      return this.isLess(end);
+      return this.isLessOrEqual(end);
     }
     
     return true;
