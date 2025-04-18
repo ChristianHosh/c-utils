@@ -7,7 +7,7 @@ import java.math.RoundingMode;
 import java.text.DecimalFormat;
 
 @SuppressWarnings("unused")
-public class CDecimal extends Number implements Comparable<CDecimal>, Serializable {
+public final class CDecimal extends Number implements Comparable<CDecimal>, Serializable {
   
   @Serial
   private static final long serialVersionUID = 998866456123654789L;

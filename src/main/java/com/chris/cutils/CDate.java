@@ -3,12 +3,12 @@ package com.chris.cutils;
 
 import java.time.*;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
+import java.time.temporal.*;
 import java.util.Objects;
 import java.util.TimeZone;
 
 @SuppressWarnings("unused")
-public final class CDate implements Comparable<CDate> {
+public final class CDate implements Comparable<CDate>, Temporal, TemporalAdjuster {
   
   public static final long DAY_IN_MS = 86400000L;
   public static final int SECOND = 1000;
@@ -25,10 +25,10 @@ public final class CDate implements Comparable<CDate> {
     TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
   }
   
-  private final LocalDateTime dateTime;
+  private final LocalDateTime value;
   
-  public CDate(LocalDateTime dateTime) {
-    this.dateTime = dateTime;
+  public CDate(LocalDateTime value) {
+    this.value = value;
   }
   
   public CDate(int day, int month, int year) {
@@ -44,7 +44,7 @@ public final class CDate implements Comparable<CDate> {
   }
   
   public CDate(LocalDate date, LocalTime time) {
-    this.dateTime = LocalDateTime.of(date, time);
+    this.value = LocalDateTime.of(date, time);
   }
   
   public static CDate currentServerDate() {
@@ -95,19 +95,19 @@ public final class CDate implements Comparable<CDate> {
   }
   
   public Instant toInstant() {
-    return this.dateTime.atZone(UTC).toInstant();
+    return this.value.atZone(UTC).toInstant();
   }
   
   public LocalDateTime toLocalDateTime() {
-    return this.dateTime;
+    return this.value;
   }
   
   public LocalDate toLocalDate() {
-    return this.dateTime.toLocalDate();
+    return this.value.toLocalDate();
   }
   
   public LocalTime toLocalTime() {
-    return this.dateTime.toLocalTime();
+    return this.value.toLocalTime();
   }
   
   @Override
@@ -128,59 +128,59 @@ public final class CDate implements Comparable<CDate> {
   }
   
   public CDate addMillis(long millis) {
-    return new CDate(this.dateTime.plus(millis, ChronoUnit.MILLIS));
+    return new CDate(this.value.plus(millis, ChronoUnit.MILLIS));
   }
   
   public CDate addSecond(long seconds) {
-    return new CDate(this.dateTime.plusSeconds(seconds));
+    return new CDate(this.value.plusSeconds(seconds));
   }
   
   public CDate addMinute(long minutes) {
-    return new CDate(this.dateTime.plusMinutes(minutes));
+    return new CDate(this.value.plusMinutes(minutes));
   }
   
   public CDate addHour(long hours) {
-    return new CDate(this.dateTime.plusHours(hours));
+    return new CDate(this.value.plusHours(hours));
   }
   
   public CDate addDay(long days) {
-    return new CDate(this.dateTime.plusDays(days));
+    return new CDate(this.value.plusDays(days));
   }
   
   public CDate addWeek(long weeks) {
-    return new CDate(this.dateTime.plusWeeks(weeks));
+    return new CDate(this.value.plusWeeks(weeks));
   }
   
   public CDate addMonth(long months) {
-    return new CDate(this.dateTime.plusMonths(months));
+    return new CDate(this.value.plusMonths(months));
   }
   
   public CDate addYear(long years) {
-    return new CDate(this.dateTime.plusYears(years));
+    return new CDate(this.value.plusYears(years));
   }
   
   public int getYear() {
-    return this.dateTime.getYear();
+    return this.value.getYear();
   }
   
   public int getMonth() {
-    return this.dateTime.getMonthValue();
+    return this.value.getMonthValue();
   }
   
   public int getDay() {
-    return this.dateTime.getDayOfMonth();
+    return this.value.getDayOfMonth();
   }
   
   public int getHour() {
-    return this.dateTime.getHour();
+    return this.value.getHour();
   }
   
   public int getMinute() {
-    return this.dateTime.getMinute();
+    return this.value.getMinute();
   }
   
   public int getSecond() {
-    return this.dateTime.getSecond();
+    return this.value.getSecond();
   }
   
   public CDate zeroTime() {
@@ -208,7 +208,7 @@ public final class CDate implements Comparable<CDate> {
   }
   
   public DayOfWeek getDayOfWeek() {
-    return this.dateTime.getDayOfWeek();
+    return this.value.getDayOfWeek();
   }
   
   public CPeriod toPeriod(CDate other) {
@@ -236,7 +236,7 @@ public final class CDate implements Comparable<CDate> {
   }
   
   public int hashCode() {
-    return 111 + Objects.hash(this.dateTime);
+    return 111 + Objects.hash(this.value);
   }
   
   public boolean equals(Object obj) {
@@ -259,7 +259,7 @@ public final class CDate implements Comparable<CDate> {
   
   @Override
   public int compareTo(CDate that) {
-    return this.dateTime.compareTo(that.dateTime);
+    return this.value.compareTo(that.value);
   }
   
   public boolean isLastDayOfMonth() {
@@ -272,11 +272,11 @@ public final class CDate implements Comparable<CDate> {
   }
   
   public CDate toFirstDayOfMonth() {
-    return this.isFirstDayOfMonth() ? this : new CDate(this.dateTime.withDayOfMonth(1));
+    return this.isFirstDayOfMonth() ? this : new CDate(this.value.withDayOfMonth(1));
   }
   
   public CDate toLastDayOfMonth() {
-    return this.isLastDayOfMonth() ? this : new CDate(this.dateTime.withDayOfMonth(this.toLocalDate().lengthOfMonth()));
+    return this.isLastDayOfMonth() ? this : new CDate(this.value.withDayOfMonth(this.toLocalDate().lengthOfMonth()));
   }
   
   public boolean isLastDayOfYear() {
@@ -289,14 +289,54 @@ public final class CDate implements Comparable<CDate> {
   }
   
   public CDate toFirstDayOfYear() {
-    return this.isFirstDayOfYear() ? this : new CDate(this.dateTime.withDayOfYear(1));
+    return this.isFirstDayOfYear() ? this : new CDate(this.value.withDayOfYear(1));
   }
   
   public CDate toLastDayOfYear() {
-    return this.isLastDayOfYear() ? this : new CDate(this.dateTime.withDayOfYear(this.toLocalDate().lengthOfYear()));
+    return this.isLastDayOfYear() ? this : new CDate(this.value.withDayOfYear(this.toLocalDate().lengthOfYear()));
   }
   
   public Month getMonthEnum() {
-    return this.dateTime.getMonth();
+    return this.value.getMonth();
+  }
+
+  @Override
+  public boolean isSupported(TemporalUnit unit) {
+    return value.isSupported(unit);
+  }
+
+  @Override
+  public CDate with(TemporalField field, long newValue) {
+    return get(field) == newValue ? this : new CDate(this.value.with(field, newValue));
+  }
+
+  @Override
+  public int get(TemporalField field) {
+    return this.value.get(field);
+  }
+
+  @Override
+  public CDate plus(long amountToAdd, TemporalUnit unit) {
+    return amountToAdd == 0 ? this : new CDate(this.value.plus(amountToAdd, unit));
+  }
+
+  @Override
+  public long until(Temporal endExclusive, TemporalUnit unit) {
+    return this.value.until(endExclusive, unit);
+  }
+
+  @Override
+  public boolean isSupported(TemporalField field) {
+    return this.value.isSupported(field);
+  }
+
+  @Override
+  public long getLong(TemporalField field) {
+    return this.value.getLong(field);
+  }
+
+  @Override
+  public Temporal adjustInto(Temporal temporal) {
+    return this.value.adjustInto(temporal);
   }
 }

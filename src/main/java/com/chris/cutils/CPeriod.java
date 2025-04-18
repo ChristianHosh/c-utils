@@ -2,16 +2,13 @@ package com.chris.cutils;
 
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalUnit;
-import java.util.List;
 import java.util.Objects;
 
 @SuppressWarnings("unused")
-public class CPeriod implements Comparable<CPeriod> {
+public final class CPeriod implements Comparable<CPeriod> {
   
   private final CDate start;
   private final CDate end;
-  
-  private static final List<TemporalUnit> UNITS = List.of(ChronoUnit.YEARS, ChronoUnit.MONTHS, ChronoUnit.WEEKS, ChronoUnit.DAYS, ChronoUnit.HOURS, ChronoUnit.MINUTES, ChronoUnit.SECONDS);
   
   public CPeriod(CDate start, CDate end) {
     Objects.requireNonNull(start);
@@ -122,7 +119,7 @@ public class CPeriod implements Comparable<CPeriod> {
   }
   
   @Override
-  public final boolean equals(Object o) {
+  public boolean equals(Object o) {
     if (!(o instanceof CPeriod that)) return false;
     
     return this == that || (this.start.equals(that.start) && this.end.equals(that.end));
