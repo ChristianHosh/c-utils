@@ -2,7 +2,8 @@ package com.chris.cutils;
 
 import java.security.SecureRandom;
 
-public class CString {
+@SuppressWarnings("unused")
+public final class CString {
   
   /**
    * Reverses the given string.
